@@ -1,0 +1,2 @@
+mongodb user : project manager user
+password: 0rEuhEdvgUN7JD7s 
