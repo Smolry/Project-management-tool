@@ -190,7 +190,7 @@ export default function Dashboard() {
             {projects.map((p, i) => (
               <li key={i}>
                 <strong>{p.name}</strong> — {p.status} —
-                <a href={`/projects/${p._id}`}>View</a>
+                <Link to={`/projects/${p._id}`}>View</Link>
               </li>
             ))}
           </ul>
