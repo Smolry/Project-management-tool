@@ -1,6 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 const API_URL = import.meta.env.VITE_API_URL;
 
 function sessionGet(key) {
@@ -235,7 +235,7 @@ export default function Projects() {
             <li key={i}>
               <strong>{p.name}</strong> —<p>
                 {progressMap[p._id]? `Progress: ${progressMap[p._id].percentage}% (${progressMap[p._id].completed}/${progressMap[p._id].total})`: 'Loading progress...'}
-                </p> — <a href={`/projects/${p._id}`}>View</a>
+                </p> — <Link to={`/projects/${p._id}`}>View</Link>
             </li>
           ))}
         </ul>
