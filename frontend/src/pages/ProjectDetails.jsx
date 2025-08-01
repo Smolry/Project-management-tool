@@ -52,10 +52,15 @@ export default function Projectdetails() {
     };
 
     const fetchUsers = async () => {
-      const res = await fetch(`${API_URL}/api/projects/${id}/tasks/users`);
-      if (res.ok) {
+      try {
+        const res = await fetch(`${API_URL}/api/projects/${id}/tasks/users`);
+        if (!res.ok) {
+          throw new Error('Failed to fetch users');
+        }
         const data = await res.json();
         setUsers(data);
+      } catch (err) {
+        console.error('Error fetching users:', err);
       }
     };
 
