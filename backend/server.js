@@ -219,6 +219,7 @@ app.post('/api/projects/progress-batch', async (req, res) => {
   }
 });
 
+
 // POST /api/projects/:id/tasks - Create a new task for a project
 app.post('/api/projects/:id/tasks', async (req, res) => {
   try {
