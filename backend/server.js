@@ -219,6 +219,51 @@ app.post('/api/projects/progress-batch', async (req, res) => {
   }
 });
 
+// POST /api/projects/:id/tasks - Create a new task for a project
+app.post('/api/projects/:id/tasks', async (req, res) => {
+  try {
+    const { title, assignedTo } = req.body;
+    const projectId = req.params.id;
+
+    // Validate project exists
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    // Find assignee if provided
+    let assigneeId = null;
+    if (assignedTo) {
+      const assignee = await User.findOne({ email: assignedTo });
+      if (assignee) {
+        assigneeId = assignee._id;
+      }
+    }
+
+    // Create new task
+    const task = new Task({
+      title,
+      project: projectId,
+      assignedTo: assigneeId,
+      status: 'todo'
+    });
+
+    const savedTask = await task.save();
+    
+    // Populate task with assignee details
+    const populatedTask = await Task.findById(savedTask._id)
+      .populate('assignedTo', 'name email')
+      .populate('project', 'name');
+
+    res.status(201).json(populatedTask);
+  } catch (err) {
+    console.error('Error creating task:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
