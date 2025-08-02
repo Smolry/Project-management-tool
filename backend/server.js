@@ -219,6 +219,122 @@ app.post('/api/projects/progress-batch', async (req, res) => {
   }
 });
 
+
+// POST /api/projects/:id/tasks - Create a new task for a project
+app.post('/api/projects/:id/tasks', async (req, res) => {
+  try {
+    const { title, assignedTo } = req.body;
+    const projectId = req.params.id;
+
+    // Validate project exists
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    // Find assignee if provided
+    let assigneeId = null;
+    if (assignedTo) {
+      const assignee = await User.findOne({ email: assignedTo });
+      if (assignee) {
+        assigneeId = assignee._id;
+      }
+    }
+
+    // Create new task
+    const task = new Task({
+      title,
+      project: projectId,
+      assignedTo: assigneeId,
+      status: 'todo'
+    });
+
+    const savedTask = await task.save();
+    
+    // Populate task with assignee details
+    const populatedTask = await Task.findById(savedTask._id)
+      .populate('assignedTo', 'name email')
+      .populate('project', 'name');
+
+    res.status(201).json(populatedTask);
+  } catch (err) {
+    console.error('Error creating task:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET /api/projects/:id/tasks - Get all tasks for a project
+app.get('/api/projects/:id/tasks', async (req, res) => {
+  try {
+    const projectId = req.params.id;
+
+    // Validate project exists
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    // Find all tasks for this project and populate assignee details
+    const tasks = await Task.find({ project: projectId })
+      .populate('assignedTo', 'name email')
+      .populate('project', 'name');
+
+    res.json(tasks);
+  } catch (err) {
+    console.error('Error fetching project tasks:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET /api/projects/:id/tasks/users - Get all users associated with a project
+app.get('/api/projects/:id/tasks/users', async (req, res) => {
+  try {
+    const projectId = req.params.id;
+
+    // Validate project exists and populate owner/members
+    const project = await Project.findById(projectId)
+      .populate('owner', 'name email')
+      .populate('members', 'name email');
+
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    // Combine owner and members into single users array
+    const users = [
+      project.owner,
+      ...project.members
+    ].filter(user => user); // Remove any null/undefined entries
+
+    res.json(users);
+  } catch (err) {
+    console.error('Error fetching project users:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// DELETE /api/tasks/:id - Delete a task
+app.delete('/api/tasks/:id', async (req, res) => {
+  try {
+    const taskId = req.params.id;
+
+    // Validate task exists
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+
+    // Delete the task
+    await Task.findByIdAndDelete(taskId);
+
+    res.json({ message: 'Task deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting task:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
