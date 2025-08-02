@@ -133,6 +133,107 @@ npm run dev
 ```
 Access the application at: http://localhost:5173
 
+## Api Documentation
+### Authentication endpoints
+1. ```POST /api/users/me```
+ * Purpose: Find or create user
+ * Request Body:
+    ```
+    {
+    "sub": "auth0|123",
+    "name": "User Name",
+    "email": "user@example.com",
+    "picture": "url",
+    "email_verified": boolean
+    }
+    ```
+
+2. ```PUT /api/users/me```
+ * Purpose: Update user profile
+ * Request Body: Same as ```POST /api/users/me```
+### Project Endpoints
+3. ```POST /api/projects```
+ * Purpose: Create new project
+ * Request Body:
+   ```
+   {
+   "sub": "auth0|123",
+   "name": "Project Name",
+   "description": "Project Description",
+   "type": "personal|team",
+   "status": "active",
+   "githubLink": "url",
+   "deploymentUrl": "url",
+   "environmentNotes": "notes",
+   "members": ["member@email.com"]
+   }
+   ```
+
+4.``` POST /api/projects/me```
+ * Purpose: Get all projects owned by user
+ * Request Body:
+   ```
+   {
+   "sub": "auth0|123"
+   }
+   ```
+
+5. ```GET /api/projects/:id```
+ * Purpose: Get project details with populated owner and members
+ * URL Parameters: id (project ID)
+6. ```POST /api/projects/join```
+ * Purpose: Join project using invite code
+ * Request Body:
+```
+{
+  "code": "inviteCode",
+  "sub": "auth0|123"
+}
+```
+
+### Task Endpoints
+7. ```POST /api/projects/:id/tasks```
+ * Purpose: Create new task in project
+ * URL Parameters: id (project ID)
+ * Request Body:
+```
+{
+  "title": "Task Title",
+  "assignedTo": "user@email.com"
+}
+```
+
+8. ```GET /api/projects/:id/tasks```
+ * Purpose: Get all tasks for a project
+ * URL Parameters: id (project ID)
+9. ```DELETE /api/tasks/:id```
+ * Purpose: Delete a task
+ * URL Parameters: id (task ID)
+10. ```GET /api/tasks/assigned/:sub```
+ * Purpose: Get tasks assigned to user
+ * URL Parameters: sub (user's Auth0 sub)
+### Project Progress
+11. ```POST /api/projects/progress-batch```
+ * Purpose: Get progress for multiple projects
+ * Request Body:
+```
+{
+  "projectIds": ["project1Id", "project2Id"]
+}
+```
+### User Management in Projects
+12. ```GET /api/projects/:id/tasks/users```
+ * Purpose: Get all users associated with a project
+ * URL Parameters: id (project ID)
+
+All endpoints return appropriate HTTP status codes:
+
+* 200: Success
+* 201: Created
+* 400: Bad Request
+* 404: Not Found
+* 500: Server Error
+
 ## Testing
 After setup, verify:
 
